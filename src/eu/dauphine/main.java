@@ -20,50 +20,6 @@ public class main {
 
         Entrepot entrepot = new Entrepot(5,5);
 
-        /*
-        Lot lotVis = new Lot( 3, "Vis", 5.4, 3.5);
-        Lot lotBoulon = new Lot( 2, "Boulon", 10.0, 21.0);
-        Lot lotPlanche = new Lot( 2, "plance", 12.0, 21.0);
-        Lot lotCharniere = new Lot( 2, "charniere", 10.0, 21.0);
-        Lot lotCheville = new Lot( 2, "cheville", 10.0, 21.0);
-
-        LinkedList<Lot> lotLinkedList = new LinkedList<>();
-
-
-        LinkedList ListeLotTable = new LinkedList();
-        ListeLotTable.add(lotVis);
-        ListeLotTable.add(lotPlanche);
-
-        LinkedList ListeLotLit = new LinkedList();
-        ListeLotTable.add(lotCharniere);
-        ListeLotTable.add(lotCheville);
-
-
-
-        Meuble table= new Meuble(ListeLotTable, 3, "Table", PieceMaison.SALLE_A_MANGER);
-        Meuble lit = new Meuble(ListeLotLit, 3, "lit", PieceMaison.SALLE_A_MANGER);
-
-        LinkedList<Meuble> listeMeublec1 = new LinkedList<Meuble>();
-        listeMeublec1.add(table);
-        listeMeublec1.add(lit);
-
-        Ouvrier ouvrier1 = new Ouvrier(PieceMaison.SALON);
-        Ouvrier ouvrier2 = new Ouvrier(PieceMaison.SALON);
-        Ouvrier ouvrier3 = new Ouvrier(PieceMaison.SALLE_A_MANGER);
-        Ouvrier ouvrier4 = new Ouvrier(PieceMaison.CHAMBRE);
-        Chef chef = new ChefBrico(ouvrier1,ouvrier2,ouvrier3,ouvrier4);
-
-
-
-        LinkedList<Chef> listChef = new LinkedList<Chef>();
-        listChef.add(chef);
-
-        entrepot.setChef_equipe(listChef);
-        Commande commande2 = new Commande(listeMeublec1);
-
-        */
-
-
         Scanner sc = new Scanner(System.in);
         System.out.println("Choisissez la consigne \n 1 : recevoir un nouveau lot \n 2 : nouvelle commande de meuble \n 3 : rien \n q : to quit the program \n ");
         while(sc.hasNextLine() ) {
@@ -164,6 +120,11 @@ public class main {
             }
             System.out.println("Timer : " + Timer.time + " \n l'entrepot est en attente de recevoir une nouvelle consigne : \n");
             entrepot.traiterLesCommandes();
+
+            System.out.println("La trésorerie de l'entrepot est " + entrepot.getTresorerie() + " EURO");
+            System.out.println("La masse salariale de l'entrepot est " + entrepot.getMasseSalariale() + " EURO, le total des salaires à payer est " + entrepot.getTotalSalaireAPayer() + " EURO après " + Timer.time + " pas de temps");
+            double benefice = entrepot.getTresorerie() - entrepot.getTotalSalaireAPayer();
+            System.out.println("Le bénéfice de l'entrepot est " + benefice + " EURO");
         }
 
 

@@ -41,10 +41,15 @@ public abstract class Personnel {
     protected PieceMaison specialite;
 
 
-    public double montantAPercevoir;
+    public double salaireCummuleAPercevoir;
 
+    public double getSalaireCummuleAPercevoir(){
+        return salaireCummuleAPercevoir;
+    }
 
-
+    public void setSalaireCummuleAPercevoir(double salaireCummuleAPercevoir) {
+        this.salaireCummuleAPercevoir = salaireCummuleAPercevoir;
+    }
 
 
 }

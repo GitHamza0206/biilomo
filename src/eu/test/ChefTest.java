@@ -3,10 +3,7 @@ package eu.test;
 import eu.dauphine.Constants.PieceMaison;
 import eu.dauphine.Exceptions.StockageException;
 import eu.dauphine.Inteferaces.GestionStock;
-import eu.dauphine.Personnel.ChefBrico;
-import eu.dauphine.Personnel.Chef;
-import eu.dauphine.Personnel.Ouvrier;
-import eu.dauphine.Personnel.Personnel;
+import eu.dauphine.Personnel.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -58,6 +58,7 @@ public class Lot {
 
     public double getPrix() {
         return prix;
+
     }
 
     public double getPoids() {
@@ -66,6 +67,10 @@ public class Lot {
 
     public void setVolume(int volume) {
         this.volume = volume;
+    }
+
+    public void setPrix(double prix) {
+        this.prix = prix;
     }
 
     @Override

@@ -20,13 +20,15 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
     int tempsRestantPourFinirLaConstruction;
     int TempsPourFinirLeStockage;
     Meuble meubleEnCoursDeMontage;
-    double montantAPercevoir;
+
 
     /**
      * Default constructor
      */
     public Ouvrier(PieceMaison pieceMaison) {
+        super.nom = "Ouvrier" + identifiant;
         super.specialite = pieceMaison;
+        identifiant++;
     }
 
 
@@ -39,7 +41,7 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
      * 
      */
 
-
+    public static int identifiant=1;
 
     @Override
     public void retirerLot(Entrepot entrepot, Lot lot) throws StockageException {
@@ -85,7 +87,7 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
             entrepot.monterLeMeuble(meuble);
             setDisponible(false);
             setTempsRestantPourFinirLaConstruction(meuble.getDureeConstruction());
-             setMontantAPercevoir();
+
 
         } else {
             throw new ConstructionException("L'ouvrier n'est pas spécialisé dans la construction du meuble " + meuble.getNom());
@@ -133,9 +135,31 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
     }
 
     @Override
+    public double getSalaire() {
+        return salaire;
+    }
+
+    @Override
+    public String getNom() {
+        return super.nom;
+    }
+
+    @Override
+    public double getSalaireCummuleAPercevoir() {
+        return super.salaireCummuleAPercevoir;
+    }
+
+    @Override
+    public void setSalaireCummuleAPercevoir(double salaireCummuleAPercevoir) {
+        super.setSalaireCummuleAPercevoir(salaireCummuleAPercevoir);
+    }
+
+    @Override
     public String toString() {
         return "Ouvrier{" +
-                "Disponible=" + Disponible +
+                "Nom=" + getNom() +
+                ", Disponible=" + Disponible +
+                ", Spécialité=" + specialite==null ? String.valueOf(specialite) : "" +
                 ", tempsRestantPourFinirLaConstruction=" + tempsRestantPourFinirLaConstruction +
                 ", TempsPourFinirLeStockage=" + TempsPourFinirLeStockage +
                 ", meubleEnCoursDeMontage=" + meubleEnCoursDeMontage +
@@ -143,18 +167,7 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
                 '}';
     }
 
-    @Override
-    public double getMontantAPercevoir() {
-        return this.montantAPercevoir;
-    }
 
-    @Override
-    public void setMontantAPercevoir() {
-        double montant = getMontantAPercevoir();
-        for(Lot lot: this.getMeubleEnCoursDeMontage().getListeLots()){
-            montantAPercevoir += lot.getPrix();
-        }
-        this.montantAPercevoir = montant;
-    }
+
 
 }

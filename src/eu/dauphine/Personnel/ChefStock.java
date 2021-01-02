@@ -13,9 +13,13 @@ import java.util.*;
 public class ChefStock extends Chef implements GestionStock {
     boolean Disponible;
     int TempsPourFinirLeStockage;
+    public static int identifiant=1;
 
     public ChefStock(){
+
         super();
+        super.nom = "ChefStock" + identifiant;
+        identifiant++;
     }
 
     /**
@@ -23,6 +27,8 @@ public class ChefStock extends Chef implements GestionStock {
      */
     public ChefStock(Personnel ouvrier1, Personnel ouvrier2 , Personnel ouvrier3 , Personnel ouvrier4) {
         super(ouvrier1,ouvrier2,ouvrier3,ouvrier4);
+        super.nom = "ChefStock" + identifiant;
+        identifiant++;
     }
 
 
@@ -64,8 +70,12 @@ public class ChefStock extends Chef implements GestionStock {
     /**
      * 
      */
-
-
-
-
+    @Override
+    public String toString() {
+        return "ChefStock{" +
+                "Nom=" + super.nom +
+                ", Disponible=" + Disponible +
+                ", TempsPourFinirLeStockage=" + TempsPourFinirLeStockage +
+                '}';
+    }
 }

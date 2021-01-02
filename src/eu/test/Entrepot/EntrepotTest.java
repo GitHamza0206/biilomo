@@ -93,4 +93,95 @@ class EntrepotTest {
         Commande c = new Commande(listmeuble);
         entrepot.recevoir(c);
     }
+
+
+    @Test
+    void calculMasseSalariale() throws StockageException {
+        Ouvrier ouvrier1 = new Ouvrier(PieceMaison.CUISINE);
+        Ouvrier ouvrierStock1 = new Ouvrier(null);
+
+        ChefBrico chefBrico1 = new ChefBrico(ouvrier1,null,null,null);
+        ChefStock chefStock1 = new ChefStock(ouvrierStock1,null,null,null);
+
+        List<Chef> listChefs = new LinkedList<>();
+        listChefs.add(chefBrico1);
+        listChefs.add(chefStock1);
+
+        entrepot.setChef_equipe(listChefs);
+
+        for(int i=0;i<2;i++){
+            for(Chef chef: entrepot.getChef_equipe()){
+                chef.recevoirSalaire();
+            }
+        }
+
+
+        assertEquals(entrepot.getMasseSalariale(), 30);
+        assertEquals(entrepot.getTotalSalaireAPayer(), 60);
+
+    }
+
+    @Test
+    void calculLeCoutDeRevient() throws StockageException, RejetException, ConstructionException, CloneNotSupportedException {
+        List<Chef> chefs = entrepot.getChef_equipe();
+        Entrepot entrepot = new Entrepot(5,5);
+
+        Lot vis = new Lot(3,"vis",3.0,3.0);
+        entrepot.recevoir(vis);
+
+        Lot vis2 = new Lot(3,"vis",3.0,100.0);
+        entrepot.recevoir(vis2);
+
+        Lot lotTable = new Lot(4,"vis");
+        List<Lot> listLotMeubleTable = new LinkedList()   ;
+        listLotMeubleTable.add(lotTable);
+        Meuble meubleTable = new Meuble(listLotMeubleTable,3,"table",PieceMaison.CUISINE)     ;
+
+        List<Meuble> listMeube = new LinkedList<>();
+        listMeube.add((meubleTable));
+
+        Commande commande = new Commande(listMeube);
+        entrepot.recevoir(commande);
+
+        assertEquals(entrepot.getTresorerie(),109);
+
+    }
+
+    @Test
+    void verifierSiLicencimentEnCasDeFinDeCommande() throws StockageException, RejetException, ConstructionException, CloneNotSupportedException {
+
+        Entrepot entrepot = new Entrepot(5,5);
+
+        Ouvrier ouvrier1 = new Ouvrier(PieceMaison.CUISINE);
+        Ouvrier ouvrierStock1 = new Ouvrier(null);
+
+        ChefBrico chefBrico1 = new ChefBrico(ouvrier1,null,null,null);
+        ChefStock chefStock1 = new ChefStock(ouvrierStock1,null,null,null);
+
+        List<Chef> listChefs = new LinkedList<>();
+        listChefs.add(chefBrico1);
+        listChefs.add(chefStock1);
+
+        entrepot.setChef_equipe(listChefs);
+
+        Lot vis = new Lot(3,"vis",3.0,3.0);
+        entrepot.recevoir(vis);
+
+        Lot vis2 = new Lot(3,"vis",3.0,100.0);
+        entrepot.recevoir(vis2);
+
+        Lot lotTable = new Lot(4,"vis");
+        List<Lot> listLotMeubleTable = new LinkedList()   ;
+        listLotMeubleTable.add(lotTable);
+        Meuble meubleTable = new Meuble(listLotMeubleTable,3,"table",PieceMaison.CUISINE)     ;
+
+        List<Meuble> listMeube = new LinkedList<>();
+        listMeube.add((meubleTable));
+
+        Commande commande = new Commande(listMeube);
+        entrepot.recevoir(commande);
+
+        assertEquals(entrepot.getChef_equipe().size(),2);
+
+    }
 }

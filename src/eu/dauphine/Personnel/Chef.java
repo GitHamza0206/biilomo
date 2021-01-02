@@ -1,5 +1,6 @@
 package eu.dauphine.Personnel;
 
+import eu.dauphine.Commandes.Commande;
 import eu.dauphine.Constants.PieceMaison;
 import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.StockageException;
@@ -66,7 +67,24 @@ public abstract class Chef extends Personnel {
      *
      */
 
+    public void recevoirSalaire(){
+        double salaireTotal = this.getSalaireCummuleAPercevoir();
+        this.setSalaireCummuleAPercevoir(this.salaire + salaireTotal);
 
+        for(int i=0;i<personnelList.size();i++){
+            Personnel p = personnelList.get(i);
+            if(p != null) {
+                if(p instanceof Ouvrier) {
+                    Ouvrier ouvrier = (Ouvrier) p;
+                    salaireTotal = ouvrier.getSalaireCummuleAPercevoir();
+                    ouvrier.setSalaireCummuleAPercevoir(ouvrier.getSalaire() + salaireTotal);
+                }
+
+
+            }
+        }
+
+    }
 
     public Personnel recruterPersonnel(PieceMaison pieceMaison){
         // comme on veut un ouvrier pour stocke, sa spécialité importe peu
@@ -75,7 +93,7 @@ public abstract class Chef extends Personnel {
             if(personnelList.get(i) == null) {
                 Ouvrier ouvrierRecrute = new Ouvrier(pieceMaison);
                 personnelList.set(i, ouvrierRecrute);
-                System.out.println("Le personnel " +ouvrierRecrute.toString() + " a  été recruté ");
+                System.out.println("Le personnel " + ouvrierRecrute.toString() + " a  été recruté ");
 
                // break;
                 return  ouvrierRecrute;
@@ -85,6 +103,19 @@ public abstract class Chef extends Personnel {
         return null;
     }
 
+
+    public void licencierPersonnel(Personnel personnel){
+        for(int i=0;i<personnelList.size();i++){
+            if(personnelList.get(i) == personnel) {
+
+                personnelList.set(i, null);
+                System.out.println("Le personnel " + personnel.toString() + " a  été licencié ");
+
+                break;
+
+            }
+        }
+    }
 
     public GestionStock personnelDisponiblePourStockage() throws StockageException {
 
@@ -105,8 +136,8 @@ public abstract class Chef extends Personnel {
             return (Constructeur) this;
         }
         for(Personnel p : personnelList){
-            if( (p instanceof Ouvrier && ((Ouvrier) p).Disponible
-                    && ( p).specialite.equals(pieceMaison))){
+            if(p!=null && p.specialite != null && (p instanceof Ouvrier && ((Ouvrier) p).Disponible
+                    &&  p.specialite.equals(pieceMaison))){
                 return (Constructeur) p;
             }
         }
@@ -121,5 +152,13 @@ public abstract class Chef extends Personnel {
 
     public LinkedList<Personnel> getPersonnelList() {
         return personnelList;
+    }
+
+    public double getSalaireCummuleAPercevoir(){
+        return super.salaireCummuleAPercevoir;
+    }
+
+    public double getSalaire() {
+        return salaire;
     }
 }

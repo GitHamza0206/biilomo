@@ -16,7 +16,7 @@ public class ChefBrico extends Chef implements Constructeur {
     boolean Disponible = true;
     int tempsRestantPourFinirLaConstruction;
     Meuble meubleEnCoursDeMontage;
-    double montantAPercevoir;
+    public static int identifiant=1;
 
     public ChefBrico(){
         super();
@@ -25,9 +25,9 @@ public class ChefBrico extends Chef implements Constructeur {
      * Default constructor
      */
     public ChefBrico(Personnel ouvrier1, Personnel ouvrier2 , Personnel ouvrier3 , Personnel ouvrier4) {
-
         super(ouvrier1,ouvrier2,ouvrier3,ouvrier4);
-
+        super.nom = "ChefBrico" + identifiant;
+        identifiant++;
     }
 
     @Override
@@ -37,7 +37,6 @@ public class ChefBrico extends Chef implements Constructeur {
         entrepot.monterLeMeuble(meuble);
         setDisponible(false);
         setTempsRestantPourFinirLaConstruction(meuble.getDureeConstruction());
-        setMontantAPercevoir();
 
 
     }
@@ -83,19 +82,15 @@ public class ChefBrico extends Chef implements Constructeur {
         }
     }
 
+
     @Override
-    public double getMontantAPercevoir() {
-        return this.montantAPercevoir;
+    public String getNom() {
+        return super.nom;
     }
 
     @Override
-    public void setMontantAPercevoir() {
-        double montant = getMontantAPercevoir();
-        for(Lot lot: this.getMeubleEnCoursDeMontage().getListeLots()){
-            montantAPercevoir += lot.getPrix();
-        }
-        this.montantAPercevoir = montant;
-
+    public double getSalaireCummuleAPercevoir() {
+        return super.salaireCummuleAPercevoir;
     }
 
 

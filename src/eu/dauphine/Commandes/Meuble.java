@@ -44,6 +44,8 @@ public class Meuble   {
 
     private Constructeur personnelMonteurDuMeuble;
 
+    private  double coutDeRevient;
+
     public List<Lot> getListeLots() {
         return ListeLots;
     }
@@ -64,6 +66,10 @@ public class Meuble   {
         return personnelMonteurDuMeuble;
     }
 
+    public double getCoutDeRevient() {
+        return coutDeRevient;
+    }
+
     public void setDureeConstruction(int dureeConstruction) {
         this.dureeConstruction = dureeConstruction;
     }
@@ -82,5 +88,9 @@ public class Meuble   {
 
     public void setPersonnelMonteurDuMeuble(Constructeur personnelMonteurDuMeuble) {
         this.personnelMonteurDuMeuble = personnelMonteurDuMeuble;
+    }
+
+    public void setCoutDeRevient(double coutDeRevient) {
+        this.coutDeRevient = coutDeRevient;
     }
 }

@@ -16,8 +16,10 @@ public interface Constructeur  {
     boolean Disponible = true;
     int tempsRestantPourFinirLaConstruction = 0;
     Meuble meubleEnCoursDeMontage = null;
-    double montantAPercevoir = 0;
-
+    boolean getDisponible();
+    double salaire=0;
+    String nom="";
+    double salaireCummuleAPercevoir=0;
 
     /**
      * @return
@@ -26,12 +28,13 @@ public interface Constructeur  {
     void setDisponible(boolean disponible);
     void setTempsRestantPourFinirLaConstruction(int tempsRestantPourFinirLaConstruction);
 
-    boolean getDisponible();
+
     int getTempsRestantPourFinirLaConstruction();
     Meuble getMeubleEnCoursDeMontage();
     void setMeubleEnCoursDeMontage(Meuble meuble);
     void updateTempsPourEtreDispo();
-    double getMontantAPercevoir();
-    void setMontantAPercevoir();
+    double getSalaire();
+    String getNom();
+    double getSalaireCummuleAPercevoir();
 
 }
