@@ -46,6 +46,11 @@ public class Meuble   {
 
     private  double coutDeRevient;
 
+    private List<Lot> listeLotReserve = new LinkedList<Lot>();
+
+
+
+
     public List<Lot> getListeLots() {
         return ListeLots;
     }
@@ -92,5 +97,13 @@ public class Meuble   {
 
     public void setCoutDeRevient(double coutDeRevient) {
         this.coutDeRevient = coutDeRevient;
+    }
+
+    public List<Lot> getListeLotReserve() {
+        return listeLotReserve;
+    }
+
+    public void setListeLotReserve(List<Lot> listeLotReserve) {
+        this.listeLotReserve = listeLotReserve;
     }
 }

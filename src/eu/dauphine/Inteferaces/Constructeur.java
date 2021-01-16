@@ -2,12 +2,9 @@ package eu.dauphine.Inteferaces;
 
 import eu.dauphine.Commandes.Meuble;
 import eu.dauphine.Entrepot.Entrepot;
+import eu.dauphine.Entrepot.Lot;
 import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.StockageException;
-import eu.dauphine.Personnel.Personnel;
-import eu.dauphine.Time.Timer;
-
-import java.util.*;
 
 /**
  * 
@@ -36,5 +33,7 @@ public interface Constructeur  {
     double getSalaire();
     String getNom();
     double getSalaireCummuleAPercevoir();
-
+    void setIndisponible();
+    public void addTachesMonterMeuble(Meuble meuble);
+    void verifierDisponibilite();
 }

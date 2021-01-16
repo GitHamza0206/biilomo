@@ -1,11 +1,13 @@
 package eu.dauphine.Personnel;
 
 import eu.dauphine.Commandes.Commande;
+import eu.dauphine.Commandes.Meuble;
 import eu.dauphine.Constants.PieceMaison;
 import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.StockageException;
 import eu.dauphine.Inteferaces.Constructeur;
 import eu.dauphine.Inteferaces.GestionStock;
+import eu.dauphine.Parametrage.Strategie;
 
 import java.util.*;
 
@@ -31,6 +33,7 @@ public abstract class Chef extends Personnel {
     protected Personnel ouvrier4;
 
     protected LinkedList<Personnel> personnelList = new LinkedList<Personnel>();
+    boolean Disponible = true;
 
     public Chef(){
         Ouvrier ouvrier1 = null;
@@ -61,7 +64,7 @@ public abstract class Chef extends Personnel {
     }
 
     protected int salaire = 10;
-    boolean Disponible;
+
 
     /**
      *
@@ -86,24 +89,6 @@ public abstract class Chef extends Personnel {
 
     }
 
-    public Personnel recruterPersonnel(PieceMaison pieceMaison){
-        // comme on veut un ouvrier pour stocke, sa spécialité importe peu
-
-        for(int i=0;i<personnelList.size();i++){
-            if(personnelList.get(i) == null) {
-                Ouvrier ouvrierRecrute = new Ouvrier(pieceMaison);
-                personnelList.set(i, ouvrierRecrute);
-                System.out.println("Le personnel " + ouvrierRecrute.toString() + " a  été recruté ");
-
-               // break;
-                return  ouvrierRecrute;
-
-            }
-        }
-        return null;
-    }
-
-
     public void licencierPersonnel(Personnel personnel){
         for(int i=0;i<personnelList.size();i++){
             if(personnelList.get(i) == personnel) {
@@ -118,7 +103,28 @@ public abstract class Chef extends Personnel {
     }
 
     public GestionStock personnelDisponiblePourStockage() throws StockageException {
+        this.verifierDisponibilite();
+        GestionStock personnel =null;
+        if(this instanceof ChefStock && this.Disponible) {
+            personnel= (GestionStock) this;
+        }else
+        {
+            for(Personnel p : personnelList){
+                if(p instanceof Ouvrier && ((Ouvrier) p).Disponible){
+                    personnel= (GestionStock) p;
+                }
+            }
+        }
+        if (personnel == null){
+            personnel = (GestionStock)this.recruterPersonnel(Strategie.SpecialiseAleatoire());
+        }
+        personnel.setIndisponible();
 
+        return personnel;
+    }
+
+    public GestionStock personnelDisponiblePourStockageOld() throws StockageException {
+        this.verifierDisponibilite();
         if(this instanceof ChefStock && this.Disponible) {
             return (GestionStock) this;
         }
@@ -130,8 +136,27 @@ public abstract class Chef extends Personnel {
         return null;
     }
 
-
     public Constructeur personnelDisponiblePourConstruction( PieceMaison pieceMaison) throws ConstructionException {
+        this.verifierDisponibilite();
+        Constructeur personnel =null;
+        if(this instanceof ChefStock && this.Disponible) {
+            personnel= (Constructeur) this;
+        }else
+        {
+            for(Personnel p : personnelList){
+                if(p instanceof Ouvrier && ((Ouvrier) p).Disponible){
+                    personnel= (Constructeur) p;
+                }
+            }
+        }
+        if (personnel == null){
+            personnel = (Constructeur)this.recruterPersonnel(pieceMaison);
+        }
+        personnel.setIndisponible();
+
+        return personnel;
+    }
+    public Constructeur personnelDisponiblePourConstructionOld( PieceMaison pieceMaison) throws ConstructionException {
         if(this instanceof ChefBrico && this.Disponible){
             return (Constructeur) this;
         }
@@ -141,13 +166,28 @@ public abstract class Chef extends Personnel {
                 return (Constructeur) p;
             }
         }
-        //System.out.println("Il n'y a pas de personnel disponible pour le stockage dans cette equipe");
-        //throw new ConstructionException("Il n'ya pas de personnel disponible pour le stockage dans cette equipe");
-        //return null;
-        //si on trouve pas de peronnel => on recrute
+        System.out.println("Il n'y a pas de personnel disponible pour le montage dans cette equipe, nous allons recruter");
         return (Constructeur)recruterPersonnel(pieceMaison);
 
     }
+
+    public Personnel recruterPersonnel(PieceMaison pieceMaison){
+        // comme on veut un ouvrier pour stocke, sa spécialité importe peu
+
+        for(int i=0;i<personnelList.size();i++){
+            if(personnelList.get(i) == null) {
+                Ouvrier ouvrierRecrute = new Ouvrier(pieceMaison);
+                personnelList.set(i, ouvrierRecrute);
+                System.out.println("Le personnel " + ouvrierRecrute.toString() + " a  été recruté ");
+
+                // break;
+                return  ouvrierRecrute;
+
+            }
+        }
+        return null;
+    }
+
 
 
     public LinkedList<Personnel> getPersonnelList() {
@@ -161,4 +201,10 @@ public abstract class Chef extends Personnel {
     public double getSalaire() {
         return salaire;
     }
+
+    public boolean isDisponible() {
+        return Disponible;
+    }
+
+
 }

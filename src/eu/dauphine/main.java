@@ -7,10 +7,8 @@ import eu.dauphine.Entrepot.*;
 import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.RejetException;
 import eu.dauphine.Exceptions.StockageException;
-import eu.dauphine.Personnel.*;
-import eu.dauphine.Time.Timer;
+import eu.dauphine.Time.MyTimer;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -49,19 +47,7 @@ public class main {
 
 
 
-                    /*
-                    entrepot.recevoir(lotVis);
-
-                    entrepot.recevoir(lotBoulon);
-
-                    entrepot.recevoir(lotPlanche);
-
-                    entrepot.recevoir(lotCharniere);
-
-                    entrepot.recevoir(lotCheville);
-
-                     */
-                    Timer.time++;
+                    MyTimer.nextPasDeTemps(entrepot);
                     break;
                 case ("2"):
                     System.out.println("Créez votre Commande \n ");
@@ -104,11 +90,11 @@ public class main {
 
                     entrepot.recevoir(commande);
 
-                    Timer.time++;
+                    MyTimer.nextPasDeTemps(entrepot);
                     break;
                 case ("3"):
                     System.out.println("Rien, on attends");
-                    Timer.time++;
+                    MyTimer.nextPasDeTemps(entrepot);
                     break;
                 case ("q"):
                     sc.close();
@@ -118,13 +104,15 @@ public class main {
                     break;
 
             }
-            System.out.println("Timer : " + Timer.time + " \n l'entrepot est en attente de recevoir une nouvelle consigne : \n");
-            entrepot.traiterLesCommandes();
-
+            System.out.println("-----------------------------------");
             System.out.println("La trésorerie de l'entrepot est " + entrepot.getTresorerie() + " EURO");
-            System.out.println("La masse salariale de l'entrepot est " + entrepot.getMasseSalariale() + " EURO, le total des salaires à payer est " + entrepot.getTotalSalaireAPayer() + " EURO après " + Timer.time + " pas de temps");
+            System.out.println("La masse salariale de l'entrepot est " + entrepot.getMasseSalariale() + " EURO, le total des salaires à payer est " + entrepot.getTotalSalaireAPayer() + " EURO après " + MyTimer.pasDeTemps + " pas de temps");
             double benefice = entrepot.getTresorerie() - entrepot.getTotalSalaireAPayer();
             System.out.println("Le bénéfice de l'entrepot est " + benefice + " EURO");
+            System.out.println("-----------------------------------");
+            System.out.println("Timer : " + MyTimer.pasDeTemps + " \n l'entrepot est en attente de recevoir une nouvelle consigne : \n");
+
+
         }
 
 

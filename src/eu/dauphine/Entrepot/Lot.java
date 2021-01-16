@@ -22,19 +22,21 @@ public class Lot {
 
     private double prix;
 
-    public static int identifiant=0;
+    public static int identifiant=1;
+
+    private boolean reserver = false;
 
     /**
      * Default constructor
      */
     public Lot(int volume, String nom, Double poids , Double prix) {
-        identifiant++;
+
         this.id = identifiant;
         this.volume = volume;
         this.nom = nom  ;
         this.poids=poids;
         this.prix=prix  ;
-
+        identifiant++;
     }
     public Lot(int volume, String nom){
         this.volume = volume;
@@ -65,12 +67,24 @@ public class Lot {
         return poids;
     }
 
+    public void setReserver(boolean reserver) {
+        this.reserver = reserver;
+    }
+
+    public boolean getReserver() {
+        return this.reserver;
+    }
+
     public void setVolume(int volume) {
         this.volume = volume;
     }
 
     public void setPrix(double prix) {
         this.prix = prix;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
@@ -99,6 +113,7 @@ public class Lot {
     public boolean isDisponible(Entrepot entrepot) throws CloneNotSupportedException {
        return entrepot.isDisponible(this);
     }
+
 
     @Override
     public String toString() {

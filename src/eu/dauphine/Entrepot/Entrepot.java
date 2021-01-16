@@ -2,6 +2,7 @@ package eu.dauphine.Entrepot;
 
 import eu.dauphine.Commandes.Commande;
 import eu.dauphine.Commandes.Meuble;
+import eu.dauphine.Constants.PieceMaison;
 import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.RejetException;
 import eu.dauphine.Exceptions.StockageException;
@@ -10,7 +11,8 @@ import eu.dauphine.Inteferaces.GestionStock;
 import eu.dauphine.Inteferaces.Reception;
 import eu.dauphine.Parametrage.Strategie;
 import eu.dauphine.Personnel.*;
-import eu.dauphine.Time.Timer;
+import eu.dauphine.Time.MyTimer;
+
 
 import java.util.*;
 
@@ -54,9 +56,7 @@ public class Entrepot implements Reception {
 
     private double totalSalairesAPayer;
 
-    /**
-     *
-     */
+
     private Queue<Meuble> listeAttente = new LinkedList<Meuble>();
 
     private Queue<Meuble> listeEnCours = new LinkedList<Meuble>();
@@ -73,6 +73,11 @@ public class Entrepot implements Reception {
 
     private  Lot[][] matriceLot ;
 
+    /**
+     * Constructeur
+     * @param nbRangees
+     * @param longueurRangee
+     */
     public Entrepot(int nbRangees, int longueurRangee){
             if(nbRangees>0 && longueurRangee>0){
                 this.m = nbRangees;
@@ -91,6 +96,9 @@ public class Entrepot implements Reception {
             }
         }
 
+    /**
+     * calcul de la masse salariale, pour chaque membre du personnel, lui ajoute le salaire a chaque pas d'iteration
+      */
     private void calculeMasseSalariale(){
         double totalSalaires = 0;
         double masseSalariale = 0;
@@ -113,6 +121,9 @@ public class Entrepot implements Reception {
 
     }
 
+    /**
+     * Chaque personnel recoit son salaire, qui est ajouté au salaire déjà percu
+     */
     private void payerLePersonnel(){
         if(this.chef_equipe!=null){
             for(Chef chef: this.chef_equipe){
@@ -120,131 +131,168 @@ public class Entrepot implements Reception {
             }
             calculeMasseSalariale();
         }
-
+        System.out.println("Le personnel à été payé, la masse salariale est " + this.masseSalariale + " EURO, le total des salaire est " + this.totalSalairesAPayer + " EURO" );
     }
-    public void traiterLesCommandes() throws ConstructionException, CloneNotSupportedException, StockageException {
 
+    /**
+     * elle traite toutes les taches que l'entrepot doit executer, elles sont affectés a chaque membre du personnel
+     * @throws StockageException
+     * @throws CloneNotSupportedException
+     * @throws ConstructionException
+     */
+    public void executerTaches() throws StockageException, CloneNotSupportedException, ConstructionException {
+        // on retire les lots qui correspondent à des meubles commandés pour chaque iteration
+        for(Chef chef:chef_equipe){
+            if(chef.tachesRetirerLot!=null && chef.tachesRetirerLot.size()>0)
+                chef.tachesRetirerLot.poll();
+                if(chef.getMeubleEnCoursDeMontage() != null && chef.tachesRetirerLot.size()==0 && chef.getMeubleEnCoursDeMontage().getPersonnelMonteurDuMeuble()==null){
+                    monterLeMeuble(chef.getMeubleEnCoursDeMontage());
 
-        //on traite les commandes en cours pour vérifier si un meuble à été terminé
-        for(Meuble meuble:this.listeEnCours){
-
-            if(meuble.getPersonnelMonteurDuMeuble().getTempsRestantPourFinirLaConstruction() == Timer.time){
-
-                Constructeur p = meuble.getPersonnelMonteurDuMeuble();
-
-                System.out.println("Le meuble " + meuble.getNom() + " a bien été construit, sont coût de revient est " + meuble.getCoutDeRevient() + " EURO");
-                System.out.println("Le personnel "+ p.getNom() + " dont le salaire est " + p.getSalaire() + " qui a construit le " + meuble.getNom() + " en " + meuble.getDureeConstruction() + " pas de temps, a accumulé un total de " + p.getSalaireCummuleAPercevoir() + " EURO");
-
-
-
-                meuble.getPersonnelMonteurDuMeuble().setTempsRestantPourFinirLaConstruction(0);
-                meuble.getPersonnelMonteurDuMeuble().setDisponible(true);
-                meuble.setPersonnelMonteurDuMeuble(null);
-                listeEnCours.poll();
-
-            }
-            else
-            {
-                int tempsRestant = meuble.getPersonnelMonteurDuMeuble().getTempsRestantPourFinirLaConstruction() - Timer.time;
-                System.out.println("Le meuble " + meuble.getNom() + " est encore en cours de construction, il lui reste  " + tempsRestant + " pas de temps pour être terminé ");
-            }
-        }
-
-        //on traite la file d'attente en cas d'indisponibilité d'un personnel
-        for(Meuble meuble: this.listeAttente) {
-            for(Chef chef: this.chef_equipe) {
-
-                Constructeur monteurDuMeuble = chef.personnelDisponiblePourConstruction(meuble.getPiecemaison());
-                //Constructeur monteurDuMeuble =  chef.personnelQualifiePourConstruction(meuble.getPiecemaison());
-
-                if (monteurDuMeuble != null) {
-
-                    if (meuble.getPersonnelMonteurDuMeuble() == null){
-                        monteurDuMeuble.monterMeuble(this, meuble);
-                        listeAttente.poll();
-                        listeEnCours.add(meuble);
-                        meuble.setPersonnelMonteurDuMeuble(monteurDuMeuble);
-
-                        System.out.println("Le meuble " + meuble.getNom() + " à débuté la construction , il sera finalisé dans " + meuble.getDureeConstruction() + " pas de temps ");
-
-                    }
-                    // else
-                    //{
-                    //   System.out.println("ERREUR ! Le peronnel choisi pour monter le meuble " + meuble.getNom() + " ne peut pas monter ce meuble, car il est déja occupé");
-
-                    //}
-
-                } else {
-                    System.out.println("Il ny a pas de personnel disponible pour la construction du meuble " + meuble.getNom() + " nous devons attendre " + meuble.getDureeConstruction() + " Pas de temps ");
                 }
 
+            for(Personnel personnel: chef.getPersonnelList()){
+                if(personnel!=null && personnel.tachesRetirerLot != null && personnel.tachesRetirerLot.size()>0)
+                    personnel.tachesRetirerLot.poll();
+                if(personnel!=null && personnel.getMeubleEnCoursDeMontage()!=null && personnel.tachesRetirerLot.size()==0 && personnel.getMeubleEnCoursDeMontage().getPersonnelMonteurDuMeuble()==null){
+                    monterLeMeuble(personnel.getMeubleEnCoursDeMontage());
+
+                }
             }
-
         }
+        // une fois les lots retirés, on se charge de monter le meuble
+        Meuble meuble;
+        for(Chef chef:chef_equipe){
+            if(chef.tachesMonterMeuble!=null && chef.tachesMonterMeuble.size()>0) {
 
-        //on met à jours les données des equipes
-        if(this.chef_equipe !=null){
-            for(Chef chef: this.chef_equipe){
-                for (Personnel p : chef.getPersonnelList()){
-                    if(p!=null){
-                        //mise à jour de la disponibilité
-                        Constructeur constructeur = (Constructeur) p;
-                        if(constructeur!=null){
-                            constructeur.updateTempsPourEtreDispo();
+                meuble = chef.tachesMonterMeuble.poll();
+                if(chef.tachesMonterMeuble.size()==0){
+                    double prixDuMeuble = 0;
+                    for(Lot lot:meuble.getListeLotReserve()){
+
+
+                        for(int i=0;i<lot.getVolume();i++){
+
+                            double prixDuLot = lot.getPrix();
+                            lot.setPrix(prixDuLot);
+                            prixDuMeuble += prixDuLot;
+
                         }
                     }
+                    meuble.setCoutDeRevient(prixDuMeuble);
+
+                    tresorerie+=prixDuMeuble;
+
+                    System.out.println("Le meuble " + meuble.getNom() + " a bien été construit, sont coût de revient est " + meuble.getCoutDeRevient() + " EURO");
+
+                }
+            }
+
+            for(Personnel personnel: chef.getPersonnelList()){
+                if(personnel!=null && personnel.tachesMonterMeuble != null && personnel.tachesMonterMeuble.size()>0)
+                {
+                    meuble = personnel.tachesMonterMeuble.poll();
+                    if(personnel.tachesMonterMeuble.size()==0){
+                        double prixDuMeuble = 0;
+                        for(Lot lot:meuble.getListeLotReserve()){
+
+
+                            for(int i=0;i<lot.getVolume();i++){
+
+                                double prixDuLot = lot.getPrix();
+                                lot.setPrix(prixDuLot);
+                                prixDuMeuble += prixDuLot;
+
+                            }
+                        }
+                        meuble.setCoutDeRevient(prixDuMeuble);
+
+                        tresorerie+=prixDuMeuble;
+
+                        System.out.println("Le meuble " + meuble.getNom() + " a bien été construit, sont coût de revient est " + meuble.getCoutDeRevient() + " EURO");
+
+                    }
+
                 }
             }
         }
 
+        //on paye le personnel a chaque iteration
         payerLePersonnel();
-        Strategie.AffinerGestionPersonnel(this);
     }
 
-    public void monterLeMeuble(Meuble meuble) throws CloneNotSupportedException, StockageException {
-        //on doit monter le meuble et calculer le chiffre d'affaire généré
-
-        double prixDuMeuble = 0;
-        for(Lot lot:meuble.getListeLots()){
-            //on fragmente le volume du lot en 1 unité * qte necessaire
-            //on retire le lot et on recupère les données du prix du lot qui à été rétiré
-            Lot lotARetirer = lot.clone();
-            lotARetirer.setVolume(1);
-            for(int i=0;i<lot.getVolume();i++){
-                Lot lotRetire = retirerLot(lotARetirer);
-                double prixDuLot = lotRetire.getPrix();
-                lot.setPrix(prixDuLot);
-                prixDuMeuble += prixDuLot;
-
-            }
+    /**
+     * une fois la commande accepte on doit commencer le montage du meuble a commencer par retirer les lots correspondants
+     * @param meuble
+     * @throws StockageException
+     * @throws CloneNotSupportedException
+     */
+    public void traiter(Meuble meuble) throws StockageException, CloneNotSupportedException {
+        for(Lot lot: meuble.getListeLots()){
+            retirerLot(lot,meuble);
         }
-        meuble.setCoutDeRevient(prixDuMeuble);
+    }
 
-        tresorerie+=prixDuMeuble;
+    /**
+     * montage du meuble
+     * @param meuble
+     * @throws CloneNotSupportedException
+     * @throws StockageException
+     * @throws ConstructionException
+     */
+    public void monterLeMeuble(Meuble meuble) throws CloneNotSupportedException, StockageException, ConstructionException {
+
+        Constructeur personnel = null;
+        // on parcours les chefs (qui correspondent a des équipes)
+        for(Chef chef: chef_equipe){
+            // on recupere un personnel qualifie et disponible pour la construction
+            personnel = chef.personnelDisponiblePourConstruction(meuble.getPiecemaison());
+            // on affecte a un personnel le meuble a construire
+            personnel.setMeubleEnCoursDeMontage(meuble);
+            meuble.setPersonnelMonteurDuMeuble(personnel);
+            if (personnel!=null)
+                break;
+        }
+
+        if(personnel!=null){
+            // on ajoute le meuble comme tache dans la liste liste de taches pour chaque personnel
+            // afin de finir la construction apres le nombre correspondant de pas de temps
+            for(int i=0;i<meuble.getDureeConstruction();i++){
+                personnel.addTachesMonterMeuble(meuble);
+            }
+            System.out.println("Le meuble " + meuble.getNom() + " est en cours de montage, il lui faut " + meuble.getDureeConstruction() + " pas de temps, il sera monté par " + personnel.getNom());
+
+        }
+
 
 
 
     }
+
 
     public void stockerLot(Lot lot) throws StockageException {
 
         try {
+            // on vérifie qu'il y'a une personne capable de stocker de disponible sinon on la recrute
+
+
+            recruterSiBesoinPourStockage(null);
+
+
             final int volumeLot = lot.getVolume();
             final int[] result = DernierIndexCaseContigue(volumeLot);
             final int i = result[0];
             final int j = result[1];
 
-            Lot newLot = lot.clone();
-            newLot.setVolume(1);
+
 
             int index = j-volumeLot+1;
             while(index<=j){
+                Lot newLot = lot.clone();
+                newLot.setVolume(1);
+                newLot.setId(lot.getId());
                 matriceLot[i][index] = newLot;
                 index++;
             }
-
-            // on vérifie qu'il y'a une personne capable de stocker de disponible sinon on la recrute
-            recruterSiBesoinPourStockage();
 
             System.out.println("Le lot " + lot.toString() + " a bien été crée et stocké " );
 
@@ -255,55 +303,101 @@ public class Entrepot implements Reception {
 
     }
 
-    public Lot retirerLot(Lot lot) throws CloneNotSupportedException, StockageException {
-        recruterSiBesoinPourStockage();
-        int volumeAretirer = lot.getVolume();
-        Lot newLot = lot.clone();
-        newLot.setVolume(1);
-        Lot lotTrouve = null;
-        for(int i=0;i<m;i++){
-            for(int j=0;j<n;j++){
-                if(matriceLot[i][j]!=null){
-                    if(matriceLot[i][j].equals(newLot)){
-                        lotTrouve = matriceLot[i][j];
-                        matriceLot[i][j]=null;
-                        volumeAretirer--;
+    public Lot retirerLot(Lot lot, Meuble meuble) throws CloneNotSupportedException, StockageException {
+        GestionStock personnel = null;
+        for(Chef chef: chef_equipe){
+            personnel = chef.personnelDisponiblePourStockage();
+            if (personnel!=null)
+                break;
+        }
+
+        if(personnel!=null){
+            personnel.setMeubleEnCoursDeMontage(meuble);
+            int volumeAretirer = lot.getVolume();
+            Lot newLot = lot.clone();
+            newLot.setVolume(1);
+            newLot.setId(lot.getId());
+            Lot lotTrouve = null;
+            int lotId=0;
+
+            for(int i=0;i<m;i++){
+                for(int j=0;j<n;j++){
+                    if(matriceLot[i][j]!=null){
+                        if(matriceLot[i][j].equals(newLot)){
+                            lotTrouve = matriceLot[i][j];
+                            matriceLot[i][j]=null;
+                            if(lotId != lotTrouve.getId()){
+                                personnel.addTachesRetirerLot(lotTrouve);
+                                volumeAretirer--;
+                                lotId = lotTrouve.getId();
+                            }
+                        }
+                    }
+
+                    if(volumeAretirer==0){
+                       return lotTrouve;
                     }
                 }
-                if(volumeAretirer==0){
-                    return lotTrouve;
-                }
             }
         }
-        return  null;
+        return null;
     }
 
-    public void mettreEnAttente (Meuble meuble) {
-        this.listeAttente.add(meuble);
-    }
+    private void recruterSiBesoinPourStockage(Meuble meuble) throws StockageException {
+        //L'entrepot doit avoir un chef de stock avec un max de 4 ouvriers.
+        //soit on recrute un ouvrier et on l'affecte à un chef ou bien on recrute un chefshock
 
-    private void recruterSiBesoinPourStockage() throws StockageException {
-        if(this.chef_equipe ==null || this.chef_equipe.size() == 0){
+        if(chef_equipe==null){
             List<Chef> listChefs = new LinkedList<>();
-            ChefStock chefStock1 = new ChefStock(null,null,null,null);
-            listChefs.add(chefStock1);
+            ChefStock chefStock = new ChefStock(null,null,null,null);
+            listChefs.add(chefStock);
 
             this.setChef_equipe(listChefs);
-            System.out.println("Un chef stock à été recruté " + chefStock1.toString());
+            System.out.println("Un chef stock à été recruté " + chefStock.toString());
         }else{
-            for (Chef chef: this.chef_equipe){
-                GestionStock p = chef.personnelDisponiblePourStockage();
-                if(p == null ) {
-                    chef.recruterPersonnel(Strategie.recrutemenOuvrierSpecialiseAleatoire());
-                    break;
+            for(Chef chef: chef_equipe){
+                if (chef  instanceof ChefStock){
+                   if(chef.isDisponible()){
+                      break;
+                   }
+                   else{
+                       if(chef.getPersonnelList() !=null && chef.getPersonnelList().size()<4){
+                           PieceMaison pieceMaison;
+                           if(meuble!=null)
+                               pieceMaison = meuble.getPiecemaison();
+                           else
+                               pieceMaison = Strategie.SpecialiseAleatoire();
+
+                           chef.recruterPersonnel(pieceMaison);
+                       }
+                       else{
+                           List<Chef> listChefs = this.chef_equipe;
+                           ChefStock chefStock = new ChefStock(null,null,null,null);
+                           listChefs.add(chefStock);
+                           this.setChef_equipe(listChefs);
+                           System.out.println("Un chef stock à été recruté " + chefStock.toString());
+                           break;
+                       }
+                   }
                 }
                 else{
-                    break;
+                    List<Chef> listChefs = new LinkedList<>();
+                    ChefStock chefStock = new ChefStock(null,null,null,null);
+                    listChefs.add(chefStock);
+
+                    this.setChef_equipe(listChefs);
+                    System.out.println("Un chef stock à été recruté " + chefStock.toString());
                 }
             }
         }
 
+
+
+
+
+
     }
+
 
     /**
      * fonction qui rajoute la commande recue dans une liste de commande propre à l'entrepot
@@ -312,31 +406,47 @@ public class Entrepot implements Reception {
     @Override
     public void recevoir(Object o) throws RejetException, StockageException, CloneNotSupportedException, ConstructionException {
         if(o!=null){
+            // l'entrepot peut recevoir des commandes
             if(o instanceof Commande){
                 Commande c = (Commande) o;
+                try{
+                    afficherDetailCommande((Commande) o);
 
-                for(Meuble meuble:c.getDetailCommande()) {
-                    for (Lot lot : meuble.getListeLots()) {
-                        if (!lot.isDisponible(this)) {
-                            rejeter(c);
-                        }
+                    for(Meuble meuble:c.getDetailCommande()) {
+                        for (Lot lot : meuble.getListeLots()) {
+                            /*if (!lot.isDisponible(this)) {
+                                rejeter(c);
+                            }*/
+                             if (!reserverLotPourLeMeuble(lot,meuble)) {
+                                rejeter(c);
+                            }
+                     }
+
                     }
+                    System.out.println("Votre commande A été acceptée");
+                    ficheDeStock();
+
+                    for(Meuble meuble:c.getDetailCommande()){
+                       // mettreEnAttente(meuble);
+                        traiter(meuble);
+                    }
+
+                    //traiterLesCommandes();
+
+                    }
+                catch (Exception e) {
+                    System.out.println(e.getMessage());
+
                 }
-                System.out.println("Votre commande A été acceptée");
-
-                for(Meuble meuble:c.getDetailCommande()){
-                    mettreEnAttente(meuble);
-                }
-
-                traiterLesCommandes();
-
 
 
             }
+            // il peut aussi recevoir des lots
             else if (o instanceof Lot) {
                 Lot l = (Lot) o;
                 stockerLot(l);
             } else{
+
                 rejeter(o);
             }
         }else {
@@ -345,6 +455,25 @@ public class Entrepot implements Reception {
     }
 
     /**
+     * on affiche la commande en detail  sur la console
+     * @param commande
+     */
+    private void afficherDetailCommande(Commande commande){
+        System.out.println("---DETAIL DE LA COMMANDE---");
+        String detail="";
+        for(Meuble meuble:commande.getDetailCommande()){
+            detail+=meuble.getNom() + ", (";
+            for(Lot lot:meuble.getListeLots()){
+                detail+=lot.getNom()+":"+lot.getVolume() + ", ";
+            }
+            detail+=")";
+            System.out.println(detail);
+            detail="";
+        }
+    }
+
+    /**
+     * on rejete soit une commande soit des lots
      * @param o
      * @throws RejetException
      */
@@ -352,12 +481,15 @@ public class Entrepot implements Reception {
     public void rejeter(Object o) throws RejetException {
         if(o instanceof Commande){
             if((Commande) o!= null) {
+
                 throw new RejetException("La commande ne peut être acceptée");
             } else {
+
                 throw new RejetException("La commande est vide");
             }
         } else if (o instanceof Lot){
             if((Lot) o!= null){
+
                 throw new RejetException("Il n'ya pas assez de place pour stocker le lot");
 
             }else{
@@ -369,13 +501,17 @@ public class Entrepot implements Reception {
 
     }
 
-
-
     @Override
     public void livrer(Object o) {
 
     }
 
+    /**
+     * fonction qui permet d'obtenir les cases contigues qui permetteront de stocker les lots dans l'entrepot
+     * @param volume
+     * @return
+     * @throws StockageException
+     */
     public int[] DernierIndexCaseContigue(int volume) throws StockageException {
         int i = 0;
         int j=0;
@@ -429,7 +565,12 @@ public class Entrepot implements Reception {
 
     }
 
-
+    /**
+     * verifie la disponibilité d'un lot dans le stock
+     * @param lot
+     * @return
+     * @throws CloneNotSupportedException
+     */
     public boolean isDisponible(Lot lot) throws CloneNotSupportedException {
         int volumeAVerifier = lot.getVolume();
         Lot newLot = lot.clone();
@@ -437,9 +578,11 @@ public class Entrepot implements Reception {
         for(int i=0;i<m;i++){
             for(int j=0;j<n;j++){
                 if(matriceLot[i][j]!=null){
-                    if(matriceLot[i][j].equals(newLot)){
-                        //matriceLot[i][j]=null;
+                    Lot lotTrouve = matriceLot[i][j];
+                    if(lotTrouve.equals(newLot) && !lotTrouve.getReserver()){
+
                         volumeAVerifier--;
+                        lotTrouve.setReserver(true);
                     }
                 }
                 if(volumeAVerifier==0){
@@ -449,6 +592,32 @@ public class Entrepot implements Reception {
         }
         return  false;
     }
+
+    public boolean reserverLotPourLeMeuble(Lot lot, Meuble meuble) throws CloneNotSupportedException {
+        List<Lot> listeLotReserve = meuble.getListeLotReserve();
+        int volumeAVerifier = lot.getVolume();
+        Lot newLot = lot.clone();
+        newLot.setVolume(1);
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(matriceLot[i][j]!=null){
+                    Lot lotTrouve = matriceLot[i][j];
+                    if(lotTrouve.equals(newLot) && !lotTrouve.getReserver()){
+
+                        volumeAVerifier--;
+                        lotTrouve.setReserver(true);
+                        listeLotReserve.add(lotTrouve);
+                    }
+                }
+                if(volumeAVerifier==0){
+                    meuble.setListeLotReserve(listeLotReserve);
+                    return true;
+                }
+            }
+        }
+        return  false;
+    }
+
 
     public List<Chef> getChef_equipe() {
         return chef_equipe;
@@ -477,5 +646,22 @@ public class Entrepot implements Reception {
 
     public Queue<Meuble> getListeEnCours() {
         return listeEnCours;
+    }
+
+    public void ficheDeStock(){
+        System.out.println("---FICHE DE STOCK---");
+        String rangee="";
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                Lot lot = matriceLot[i][j];
+                if(lot!=null)
+                    rangee += lot.getNom()+" id:"+lot.getId()+ "  |  ";
+                else
+                    rangee += "vide  |  ";
+            }
+            System.out.println(rangee);
+            rangee="";
+        }
+        System.out.println("----------------");
     }
 }

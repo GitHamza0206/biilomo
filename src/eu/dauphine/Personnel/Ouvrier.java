@@ -8,7 +8,7 @@ import eu.dauphine.Exceptions.ConstructionException;
 import eu.dauphine.Exceptions.StockageException;
 import eu.dauphine.Inteferaces.Constructeur;
 import eu.dauphine.Inteferaces.GestionStock;
-import eu.dauphine.Time.Timer;
+import eu.dauphine.Time.MyTimer;
 
 import java.util.*;
 
@@ -43,34 +43,6 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
 
     public static int identifiant=1;
 
-    @Override
-    public void retirerLot(Entrepot entrepot, Lot lot) throws StockageException {
-        try{
-            if(this.Disponible){
-                entrepot.retirerLot(lot);
-                this.TempsPourFinirLeStockage = 1;
-            } else {
-                throw new StockageException("L'ouvrier est indisponible pour retirer le lot " + lot.getNom());
-            }
-        } catch (Exception e){
-            throw new StockageException("On ne peut pas retirer ");
-        }
-    }
-
-    @Override
-    public void stockerLot(Entrepot entrepot, Lot lot) throws StockageException {
-        try {
-            if(this.Disponible){
-                entrepot.stockerLot(lot);
-                this.TempsPourFinirLeStockage = 1;
-            } else {
-                throw new StockageException("L'ouvrier est indisponible pour stocker le lot " + lot.getNom());
-            }
-
-        } catch (Exception e){
-            throw new StockageException("On ne peut pas stocker ");
-        }
-    }
 
     /**
      * @return
@@ -104,7 +76,7 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
 
     @Override
     public void setTempsRestantPourFinirLaConstruction(int tempsRestantPourFinirLaConstruction) {
-        this.tempsRestantPourFinirLaConstruction = tempsRestantPourFinirLaConstruction + Timer.time;
+        this.tempsRestantPourFinirLaConstruction = tempsRestantPourFinirLaConstruction + MyTimer.pasDeTemps;
     }
 
     @Override
@@ -129,7 +101,10 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
 
     @Override
     public void updateTempsPourEtreDispo() {
-        if(tempsRestantPourFinirLaConstruction==Timer.time){
+        if(tempsRestantPourFinirLaConstruction==MyTimer.pasDeTemps){
+            Disponible=true;
+        }
+        if(TempsPourFinirLeStockage==MyTimer.pasDeTemps){
             Disponible=true;
         }
     }
@@ -155,19 +130,47 @@ public class Ouvrier extends Personnel implements GestionStock , Constructeur {
     }
 
     @Override
+    public void setTachesRetirerLot(Queue<Lot> tachesRetirerLot) {
+        super.setTachesRetirerLot(tachesRetirerLot);
+    }
+
+    @Override
+    public Queue<Lot> getTachesRetirerLot() {
+        return super.getTachesRetirerLot();
+    }
+
+    @Override
+    public void addTachesRetirerLot(Lot lot) {
+        super.addTachesRetirerLot(lot);
+    }
+
+    @Override
+    public void addTachesMonterMeuble(Meuble meuble) {
+        super.addTachesMonterMeuble(meuble);
+    }
+
+
+    @Override
+    public void verifierDisponibilite() {
+        super.verifierDisponibilite();
+    }
+
+    @Override
+    public void setIndisponible() {
+        super.Disponible=false;
+    }
+
+
+    @Override
     public String toString() {
         return "Ouvrier{" +
-                "Nom=" + getNom() +
+                "Nom='" + super.nom + '\'' +
                 ", Disponible=" + Disponible +
-                ", Spécialité=" + specialite==null ? String.valueOf(specialite) : "" +
                 ", tempsRestantPourFinirLaConstruction=" + tempsRestantPourFinirLaConstruction +
                 ", TempsPourFinirLeStockage=" + TempsPourFinirLeStockage +
                 ", meubleEnCoursDeMontage=" + meubleEnCoursDeMontage +
                 ", salaire=" + salaire +
+                ", specialite=" + specialite +
                 '}';
     }
-
-
-
-
 }
